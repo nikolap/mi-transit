@@ -1,0 +1,52 @@
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened, ready_for_review ]
+
+name: FE Tests
+
+concurrency:
+  group: ci-fe-tests-${{ github.ref }}-1
+  cancel-in-progress: true
+
+jobs:
+  pre_job:
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.draft == false }}
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+
+  fe_test:
+    needs: pre_job
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' && github.event.pull_request.draft == false }}
+    runs-on: ubuntu-latest
+
+    # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idtimeout-minutes
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Check if src or package.json changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'src/**'
+              - 'package.json'
+
+      - uses: actions/setup-node@v3
+        if: steps.filter.outputs.frontend == 'true'
+        name: Use Node.js ${{ matrix.node-version }}
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Run test suite
+        if: steps.filter.outputs.frontend == 'true'
+        working-directory: frontend
+        run: npm lint && npm run test:ci
