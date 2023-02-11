@@ -1,11 +1,13 @@
 import React, { useCallback, useMemo, useState } from "react";
 import useDebounce from "@/components/useDebounce";
 import useSWR from "swr";
-import { AutoComplete, Button } from "antd";
+import { AutoComplete, Button, Space } from "antd";
 import {
 	ConnectionSearchParams,
 	Station,
 } from "@/components/TransitSearch/types";
+
+const searchElementStyle = { maxWidth: "100%", width: "328px" };
 
 const defaultSearchParams = {
 	limit: 4,
@@ -70,19 +72,20 @@ function SearchInput({ setConnectionSearchParams }: SearchInputProps) {
 	}, [setConnectionSearchParams, searchButtonEnabled, from, to]);
 
 	return (
-		<>
+		<Space direction={"vertical"}>
 			<AutoComplete
 				options={fromAutocompleteOptions}
-				style={{ width: 200 }}
-				placeholder="from"
+				style={searchElementStyle}
+				placeholder="From"
 				onChange={(value) => setFrom(value)}
 				onSelect={(_, option) => setFrom(option.label)}
 				value={from}
+				allowClear={true}
 			/>
 			<AutoComplete
 				options={toAutocompleteOptions}
-				style={{ width: 200 }}
-				placeholder="to"
+				style={searchElementStyle}
+				placeholder="To"
 				onChange={(value) => setTo(value)}
 				onSelect={(_, option) => setTo(option.label)}
 				value={to}
@@ -91,11 +94,17 @@ function SearchInput({ setConnectionSearchParams }: SearchInputProps) {
 						onClickSearch();
 					}
 				}}
+				allowClear={true}
 			/>
-			<Button disabled={!searchButtonEnabled} onClick={onClickSearch}>
+			<Button
+				style={searchElementStyle}
+				type={"primary"}
+				disabled={!searchButtonEnabled}
+				onClick={onClickSearch}
+			>
 				Search
 			</Button>
-		</>
+		</Space>
 	);
 }
 
