@@ -1,11 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getLocations } from "@/interfaces/transport";
-
-type QueryParam = string | string[] | undefined;
-
-function isNonBlankString(s: unknown) {
-	return typeof s === "string" && s.trim() !== "";
-}
+import { QueryParam } from "@/types";
+import { isNonBlankString } from "@/utils";
 
 // TODO: can refactor out invalidParams and common error handling code, or use a lib
 function invalidParams(query: QueryParam) {
