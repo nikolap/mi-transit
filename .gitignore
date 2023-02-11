@@ -38,3 +38,6 @@ next-env.d.ts
 # intellij
 *.iml
 /.idea
+
+# jest/swc fetch related
+/.swc
