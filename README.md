@@ -56,20 +56,28 @@ Our `src` directory contains the following folders
 
 ```
 |.                  => root folder of src contains shared code used throughout
+├── components      => shared UI components
 ├── interfaces      => contains IO code at the edges of our application
 │   └── transport   => logic for interacting with our third-party transport API
 ├── pages           => pages that Next.js renders
 │   └── api         
 │       └── v1      => our API endpoints running on Vercel via lambdas
-└── styles          => CSS styling
+└── styles          => CSS overrides on top of antd styling
 ```
 
 Tests are contained in our `tests` directory.
 
 ## Future work
 
-- expanding api for search (e.g. different search times)
-- caching api requests
+- Additional validation
+    - Add in validation library
+- Additional API tests
+    - for api/v1/locations
+    - expand api/v1/connections to be more comprehensive, i.e. variants
+- Integration tests
+- Tapedeck responses for API requests to limit requests to transport.opendata.ch
+- Expanding api for search (e.g. different search times)
+- Caching api requests
 
 ## License
 
