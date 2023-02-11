@@ -47,13 +47,29 @@ This project uses [conventional commits](https://www.conventionalcommits.org/en/
 pre-commit hook setup via [Husky](https://github.com/typicode/husky). The pre-commit hook is automatically set up
 on `npm install` via `prepare`.
 
+Note: we rely on the timetable.search.ch API (via transport.opendata.ch) which is limited to 1000 route
+queries per day. Please be kind when using this API, and be aware if you start hitting rate limits this is the cause.
+
 ## Code Base Overview
 
-TODO
+Our `src` directory contains the following folders
+
+```
+|.                  => root folder of src contains shared code used throughout
+├── interfaces      => contains IO code at the edges of our application
+│   └── transport   => logic for interacting with our third-party transport API
+├── pages           => pages that Next.js renders
+│   └── api         
+│       └── v1      => our API endpoints running on Vercel via lambdas
+└── styles          => CSS styling
+```
+
+Tests are contained in our `tests` directory.
 
 ## Future work
 
-TODO
+- expanding api for search (e.g. different search times)
+- caching api requests
 
 ## License
 
