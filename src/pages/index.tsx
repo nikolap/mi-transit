@@ -17,14 +17,9 @@ interface Station {
 	icon: string;
 }
 
-interface LocationSearchResults {
-	stations: Station[];
-}
-
-function locationSearchResultsToOptions(results?: LocationSearchResults) {
+function locationSearchResultsToOptions(results?: Station[]) {
 	if (results) {
-		const stations = results.stations || [];
-		return stations.map((station: Station) => {
+		return results.map((station: Station) => {
 			return {
 				label: station.name,
 				value: station.id,
