@@ -2,8 +2,10 @@ import { Button, List, Space, Timeline } from "antd";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import {
+	Checkpoint,
 	Connection,
 	ConnectionSearchParams,
+	Section,
 } from "@/components/TransitSearch/types";
 
 interface SearchResultsProps {
@@ -29,6 +31,22 @@ function connectionDescriptionHeadline(connection: Connection) {
 	);
 }
 
+function connectionName({ journey, walk }: Section) {
+	if (journey)
+		return `[${[journey.operator, journey.category, journey.number]
+			.filter((x) => x)
+			.join(" ")}] `;
+	else if (walk) {
+		return "[walk]";
+	}
+	return "";
+}
+
+function connectionPlatform({ platform }: Checkpoint) {
+	if (platform) return ` platform ${platform}`;
+	else return "";
+}
+
 function connectionDescription(
 	connection: Connection,
 	areDetailsShown: boolean,
@@ -38,20 +56,19 @@ function connectionDescription(
 
 		const items = sections
 			.map((section) => {
-				const { journey, departure, arrival } = section;
-
+				const { departure, arrival } = section;
+				console.log(section);
 				return [
 					{
 						label: departure.departure,
-						children: `[${[journey.operator, journey.category, journey.number]
-							.filter((x) => x)
-							.join(" ")}] ${departure.station.name} platform 
-							${departure.platform}`,
+						children: `${connectionName(section)}
+						${departure.station.name}
+						${connectionPlatform(departure)}`,
 						color: "red",
 					},
 					{
 						label: arrival.arrival,
-						children: `${arrival.station.name} platform ${arrival.platform}`,
+						children: `${arrival.station.name}${connectionPlatform(arrival)}`,
 						color: "green",
 					},
 				];
