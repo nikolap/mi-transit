@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR, { SWRConfig } from "swr";
-import { AutoComplete, Button, Input } from "antd";
+import { AutoComplete, Button, List, Spin } from "antd";
 import useDebounce from "@/components/useDebounce";
 
 const content = {
@@ -11,10 +11,27 @@ const content = {
 // @ts-ignore
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
+interface ConnectionSearchParams {
+	from: string;
+	to: string;
+
+	limit?: number;
+	page?: number;
+}
+
+const defaultSearchParams = {
+	limit: 4,
+	page: 0,
+};
+
+interface SearchInputProps {
+	setConnectionSearchParams: (params: ConnectionSearchParams) => void;
+}
+
 interface Station {
 	id: string;
 	name: string;
-	icon: string;
+	icon?: string;
 }
 
 function locationSearchResultsToOptions(results?: Station[]) {
@@ -29,7 +46,7 @@ function locationSearchResultsToOptions(results?: Station[]) {
 	return [];
 }
 
-function SearchInput() {
+function SearchInput({ setConnectionSearchParams }: SearchInputProps) {
 	const [from, setFrom] = useState("");
 	const [to, setTo] = useState("");
 	const searchDebounceMs = 600;
@@ -45,8 +62,6 @@ function SearchInput() {
 		{ refreshInterval: 0 },
 	);
 
-	console.log(fromAutocomplete);
-
 	const fromAutocompleteOptions = useMemo(
 		() => locationSearchResultsToOptions(fromAutocomplete),
 		[fromAutocomplete],
@@ -54,6 +69,19 @@ function SearchInput() {
 	const toAutocompleteOptions = useMemo(
 		() => locationSearchResultsToOptions(toAutocomplete),
 		[toAutocomplete],
+	);
+
+	const onClickSearch = useCallback(() => {
+		setConnectionSearchParams({
+			...defaultSearchParams,
+			from: from,
+			to: to,
+		});
+	}, [setConnectionSearchParams, from, to]);
+
+	const searchButtonEnabled = useMemo(
+		() => from.length > 0 && to.length > 0,
+		[from, to],
 	);
 
 	return (
@@ -74,15 +102,153 @@ function SearchInput() {
 				onSelect={(_, option) => setTo(option.label)}
 				value={to}
 			/>
-			<Button>Search</Button>
+			<Button disabled={!searchButtonEnabled} onClick={onClickSearch}>
+				Search
+			</Button>
 		</div>
+	);
+}
+
+interface Prognosis {
+	platform: string | null;
+	departure: string | null;
+	arrival: string | null;
+	capacity1st: string | null;
+	capacity2nd: string | null;
+}
+
+interface Checkpoint {
+	station: Station;
+	arrival: string | null;
+	departure: string | null;
+	delay?: string | null;
+	platform: string | null;
+	prognosis?: Prognosis | null;
+}
+
+interface Journey {
+	name: string;
+	category: string;
+	categoryCode: string;
+	number: string;
+	operator: string;
+	to: string;
+	passList: Checkpoint[];
+	capacity1st: string;
+	capacity2nd: string;
+}
+
+interface Section {
+	journey: Journey;
+	walk: string | null;
+	departure: Checkpoint;
+	arrival: Checkpoint;
+}
+
+interface Connection {
+	from: Checkpoint;
+	to: Checkpoint;
+	duration: string | null;
+	transfers?: number | null;
+	products: string[] | null;
+	capacity1st: string | null;
+	capacity2nd: string | null;
+	sections: Connection[];
+}
+
+interface SearchResultsProps {
+	connectionsSearchParams: ConnectionSearchParams | undefined;
+	setConnectionSearchParams: (params: ConnectionSearchParams) => void;
+}
+
+function SearchResults({
+	connectionsSearchParams,
+	setConnectionSearchParams,
+}: SearchResultsProps) {
+	const [loading, setLoading] = useState(false);
+	const { data: connectionsResults } = useSWR(
+		connectionsSearchParams &&
+			`/api/v1/connections?${new URLSearchParams(
+				connectionsSearchParams as unknown as Record<string, string>,
+			).toString()}`,
+	);
+
+	useEffect(() => {
+		setLoading(true);
+	}, [connectionsSearchParams]);
+
+	useEffect(() => {
+		setLoading(false);
+	}, [connectionsResults]);
+
+	const onLoadMore = useCallback(() => {
+		if (connectionsSearchParams) {
+			setConnectionSearchParams({
+				...connectionsSearchParams,
+				page: (connectionsSearchParams.page || 0) + 1,
+			});
+		}
+	}, [connectionsSearchParams, setConnectionSearchParams]);
+
+	const loadMore = useMemo(() => {
+		return !loading ? (
+			<div
+				style={{
+					textAlign: "center",
+					marginTop: 12,
+					height: 32,
+					lineHeight: 32,
+				}}
+			>
+				<Button onClick={onLoadMore}>More</Button>
+			</div>
+		) : null;
+	}, [loading, onLoadMore]);
+
+	console.log(connectionsResults);
+
+	return connectionsSearchParams ? (
+		<List
+			loading={loading}
+			itemLayout="horizontal"
+			loadMore={loadMore}
+			dataSource={(connectionsResults as Connection[]) || []}
+			renderItem={(connection) => (
+				<List.Item>
+					<List.Item.Meta
+						title={`[${connection.transfers}] ${connection.products?.join(
+							" -> ",
+						)}`}
+						description={`${connection.from?.departure} - ${connection.to?.arrival} (${connection.duration})`}
+					/>
+					<div>content</div>
+				</List.Item>
+			)}
+		/>
+	) : (
+		<></>
+	);
+}
+
+function TransitSearch() {
+	const [connectionsSearchParams, setConnectionSearchParams] =
+		useState<ConnectionSearchParams>();
+
+	return (
+		<>
+			<SearchInput setConnectionSearchParams={setConnectionSearchParams} />
+			<SearchResults
+				connectionsSearchParams={connectionsSearchParams}
+				setConnectionSearchParams={setConnectionSearchParams}
+			/>
+		</>
 	);
 }
 
 export default function Home() {
 	return (
 		<SWRConfig value={{ refreshInterval: 30000, fetcher: fetcher }}>
-			<SearchInput />
+			<TransitSearch />
 		</SWRConfig>
 	);
 }
