@@ -94,8 +94,7 @@ function ConnectionListItem({ connection }: ConnectionListItemProps) {
 	const [areDetailsShown, setAreDetailsShown] = useState(false);
 
 	return (
-		// TODO: check if this actually unique
-		<List.Item key={connection.from.departure}>
+		<List.Item>
 			<List.Item.Meta
 				title={connectionTitle(connection)}
 				description={connectionDescription(connection, areDetailsShown)}
