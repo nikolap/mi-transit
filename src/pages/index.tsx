@@ -193,9 +193,10 @@ function connectionDescription(
 				return [
 					{
 						label: departure.departure,
-						children: `[${journey.operator} ${journey.category} ${journey.number}]  
-           ${departure.station.name} 
-           platform ${departure.platform}`,
+						children: `[${[journey.operator, journey.category, journey.number]
+							.filter((x) => x)
+							.join(" ")}] ${departure.station.name} platform 
+							${departure.platform}`,
 						color: "red",
 					},
 					{
