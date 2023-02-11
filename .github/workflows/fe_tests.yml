@@ -48,4 +48,4 @@ jobs:
 
       - name: Run test suite
         if: steps.filter.outputs.frontend == 'true'
-        run: npm lint && npm run test:ci
+        run: npm run lint && npm run test:ci
