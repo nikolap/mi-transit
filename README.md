@@ -1,4 +1,4 @@
-# Mit
+# MI-Transit
 
 Production: https://mi-transit.vercel.app/
 
@@ -6,7 +6,8 @@ Production: https://mi-transit.vercel.app/
 
 Project is time boxed to 3h.
 
-Have a working Swiss transit search app running and integrated with CI/CD using the [transport.opendata.ch API](https://transport.opendata.ch/docs.html).
+Have a working Swiss transit search app running and integrated with CI/CD using
+the [transport.opendata.ch API](https://transport.opendata.ch/docs.html).
 
 ## Development Environment
 
@@ -33,7 +34,18 @@ then running the local server
 
 ### Developing
 
-TODO
+During development you can run the [jest](https://jestjs.io/) test watcher via
+
+    npm run test
+
+This process will watch for changes to your source files or tests and automatically re-run them.
+
+The project has Github branch protection rules enabled on the production branch (`main`). The rules require you create a
+pull request and have your changes merged in that form.
+
+This project uses [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) and enforces them via a
+pre-commit hook setup via [Husky](https://github.com/typicode/husky). The pre-commit hook is automatically set up
+on `npm install` via `prepare`.
 
 ## Code Base Overview
 
