@@ -12,10 +12,13 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@ant-design/icons": "5.0.1",
+    "antd": "5.2.0",
     "isomorphic-unfetch": "4.0.2",
     "next": "13.1.6",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "swr": "2.0.3"
   },
   "devDependencies": {
     "@commitlint/cli": "17.4.2",
