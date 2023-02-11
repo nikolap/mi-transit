@@ -128,8 +128,8 @@ function SearchResults({
 	}, [connectionsSearchParams]);
 
 	useEffect(() => {
-		setLoading(false);
 		if (connectionsResults) {
+			setLoading(false);
 			if (connectionsSearchParams?.page === 0) {
 				setListData(connectionsResults);
 			} else {
