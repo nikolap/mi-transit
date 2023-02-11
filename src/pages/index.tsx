@@ -188,17 +188,19 @@ function connectionDescription(
 
 		const items = sections
 			.map((section) => {
-				const { departure, arrival } = section;
+				const { journey, departure, arrival } = section;
 
 				return [
 					{
 						label: departure.departure,
-						children: `${departure.station.name} [platform ${departure.platform}]`,
+						children: `[${journey.operator} ${journey.category} ${journey.number}]  
+           ${departure.station.name} 
+           platform ${departure.platform}`,
 						color: "red",
 					},
 					{
 						label: arrival.arrival,
-						children: `${arrival.station.name} [platform ${arrival.platform}]`,
+						children: `${arrival.station.name} platform ${arrival.platform}`,
 						color: "green",
 					},
 				];
