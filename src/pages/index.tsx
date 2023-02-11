@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR, { SWRConfig } from "swr";
-import { AutoComplete, Button, List, Spin } from "antd";
+import { AutoComplete, Button, List, Space, Spin, Timeline } from "antd";
 import useDebounce from "@/components/useDebounce";
 
 const content = {
@@ -153,12 +153,85 @@ interface Connection {
 	products: string[] | null;
 	capacity1st: string | null;
 	capacity2nd: string | null;
-	sections: Connection[];
+	sections: Section[];
 }
 
 interface SearchResultsProps {
 	connectionsSearchParams: ConnectionSearchParams | undefined;
 	setConnectionSearchParams: (params: ConnectionSearchParams) => void;
+}
+
+interface ConnectionListItemProps {
+	connection: Connection;
+}
+
+function connectionTitle(connection: Connection) {
+	return (
+		<>{`[${connection.transfers}] ${connection.products?.join(" -> ")}`}</>
+	);
+}
+
+function connectionDescriptionHeadline(connection: Connection) {
+	return (
+		<div>
+			{`${connection.from?.departure} - ${connection.to?.arrival} (${connection.duration})`}
+		</div>
+	);
+}
+
+function connectionDescription(
+	connection: Connection,
+	areDetailsShown: boolean,
+) {
+	if (areDetailsShown) {
+		const sections = connection.sections;
+
+		const items = sections
+			.map((section) => {
+				const { departure, arrival } = section;
+
+				return [
+					{
+						label: departure.departure,
+						children: `${departure.station.name} [platform ${departure.platform}]`,
+						color: "red",
+					},
+					{
+						label: arrival.arrival,
+						children: `${arrival.station.name} [platform ${arrival.platform}]`,
+						color: "green",
+					},
+				];
+			})
+			.flat();
+		return (
+			<Space direction={"vertical"} size={"large"}>
+				{connectionDescriptionHeadline(connection)}
+				<Timeline mode={"left"} items={items} />
+			</Space>
+		);
+	} else {
+		return <>{connectionDescriptionHeadline(connection)}</>;
+	}
+}
+
+function ConnectionListItem({ connection }: ConnectionListItemProps) {
+	const [areDetailsShown, setAreDetailsShown] = useState(false);
+
+	return (
+		<List.Item>
+			<List.Item.Meta
+				title={connectionTitle(connection)}
+				description={connectionDescription(connection, areDetailsShown)}
+			/>
+			<Button
+				type={"link"}
+				onClick={() => setAreDetailsShown(!areDetailsShown)}
+			>
+				{areDetailsShown ? "Hide" : "Details"}
+			</Button>
+		</List.Item>
+	);
 }
 
 function SearchResults({
@@ -214,15 +287,7 @@ function SearchResults({
 			loadMore={loadMore}
 			dataSource={(connectionsResults as Connection[]) || []}
 			renderItem={(connection) => (
-				<List.Item>
-					<List.Item.Meta
-						title={`[${connection.transfers}] ${connection.products?.join(
-							" -> ",
-						)}`}
-						description={`${connection.from?.departure} - ${connection.to?.arrival} (${connection.duration})`}
-					/>
-					<div>content</div>
-				</List.Item>
+				<ConnectionListItem connection={connection} />
 			)}
 		/>
 	) : (
