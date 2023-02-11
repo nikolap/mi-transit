@@ -1,4 +1,4 @@
-import { Button, List, Space, Timeline } from "antd";
+import { Button, List, Space, Timeline, Typography } from "antd";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import {
@@ -18,9 +18,11 @@ interface ConnectionListItemProps {
 }
 
 function connectionTitle(connection: Connection) {
-	return (
-		<>{`[${connection.transfers}] ${connection.products?.join(" -> ")}`}</>
-	);
+	if (connection.transfers)
+		return (
+			<>{`[${connection.transfers}] ${connection.products?.join(" -> ")}`}</>
+		);
+	else return <>{connection.products?.join(" -> ")}</>;
 }
 
 function connectionDescriptionHeadline(connection: Connection) {
@@ -37,7 +39,7 @@ function connectionName({ journey, walk }: Section) {
 			.filter((x) => x)
 			.join(" ")}] `;
 	else if (walk) {
-		return "[walk]";
+		return "[walk] ";
 	}
 	return "";
 }
@@ -57,13 +59,16 @@ function connectionDescription(
 		const items = sections
 			.map((section) => {
 				const { departure, arrival } = section;
-				console.log(section);
 				return [
 					{
 						label: departure.departure,
-						children: `${connectionName(section)}
-						${departure.station.name}
-						${connectionPlatform(departure)}`,
+						children: (
+							<>
+								{connectionName(section)}
+								{departure.station.name}
+								{connectionPlatform(departure)}
+							</>
+						),
 						color: "red",
 					},
 					{
@@ -89,7 +94,8 @@ function ConnectionListItem({ connection }: ConnectionListItemProps) {
 	const [areDetailsShown, setAreDetailsShown] = useState(false);
 
 	return (
-		<List.Item>
+		// TODO: check if this actually unique
+		<List.Item key={connection.from.departure}>
 			<List.Item.Meta
 				title={connectionTitle(connection)}
 				description={connectionDescription(connection, areDetailsShown)}
@@ -158,15 +164,19 @@ function SearchResults({
 	}, [loading, onLoadMore]);
 
 	return connectionsSearchParams ? (
-		<List
-			loading={loading}
-			itemLayout="horizontal"
-			loadMore={loadMore}
-			dataSource={listData}
-			renderItem={(connection) => (
-				<ConnectionListItem connection={connection} />
-			)}
-		/>
+		<div style={{ paddingTop: 36 }}>
+			<Typography.Title level={2}>Results</Typography.Title>
+			<List
+				loading={loading}
+				itemLayout="horizontal"
+				loadMore={loadMore}
+				dataSource={listData}
+				renderItem={(connection) => (
+					<ConnectionListItem connection={connection} />
+				)}
+				style={{ maxWidth: 768 }}
+			/>
+		</div>
 	) : (
 		<></>
 	);

@@ -78,6 +78,8 @@ Tests are contained in our `tests` directory.
 - Tapedeck responses for API requests to limit requests to transport.opendata.ch
 - Expanding api for search (e.g. different search times)
 - Caching api requests
+- Nicer date formatting
+- See if can integrate SBB icons
 
 ## License
 
